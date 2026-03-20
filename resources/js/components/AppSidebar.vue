@@ -12,6 +12,7 @@ const mainNavItems: NavItem[] = [
     { title: 'Ilm',       href: '/dashboard', icon: LayoutGrid },
     { title: 'Kaart',     href: '/map',       icon: Map },
     { title: 'Blogi',     href: '/blog',      icon: BookOpen },
+    { title: 'Pood',       href: '/shop',      icon: Folder },
 ];
 
 const footerNavItems: NavItem[] = [

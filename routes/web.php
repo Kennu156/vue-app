@@ -4,6 +4,9 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MarkerController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ShopController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -27,6 +30,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('blog/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
     Route::delete('comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+
+    Route::get('shop', [ShopController::class, 'index'])->name('shop');
+    Route::post('cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::post('cart/update', [CartController::class, 'update'])->name('cart.update');
+    Route::post('cart/remove', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+    Route::get('cart', [CartController::class, 'index'])->name('cart');
+    Route::get('checkout', [CheckoutController::class, 'index'])->name('checkout');
+    Route::post('checkout/intent', [CheckoutController::class, 'createIntent'])->name('checkout.intent');
+    Route::post('checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::get('checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+    Route::get('checkout/failed/{order}', [CheckoutController::class, 'failed'])->name('checkout.failed');
 });
 
 require __DIR__.'/settings.php';
