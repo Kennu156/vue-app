@@ -9,8 +9,9 @@ import { BookOpen, Folder, LayoutGrid, Map } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
-    { title: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
+    { title: 'Ilm',       href: '/dashboard', icon: LayoutGrid },
     { title: 'Kaart',     href: '/map',       icon: Map },
+    { title: 'Blogi',     href: '/blog',      icon: BookOpen },
 ];
 
 const footerNavItems: NavItem[] = [
