@@ -5,7 +5,7 @@ import { ref } from 'vue';
 const { isSearching, searchError, searchCity } = useWeather();
 const input = ref('');
 
-const quickCities = ['Tallinn', 'Tartu', 'Pärnu', 'Narva', 'Helsinki', 'Stockholm', 'Riga', 'London', 'Berlin', 'Tokyo'];
+const quickCities = ['Tallinn', 'Tartu', 'Pärnu', 'Narva', 'Helsinki', 'Stockholm', 'Riga', 'London', 'Berlin', 'Tokyo','Kuressaare'];
 
 function onSubmit() {
     if (input.value.trim()) searchCity(input.value.trim());

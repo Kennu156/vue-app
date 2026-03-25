@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\VolkswagenController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MarkerController;
 use App\Http\Controllers\PostController;
@@ -42,6 +43,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('checkout', [CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
     Route::get('checkout/failed/{order}', [CheckoutController::class, 'failed'])->name('checkout.failed');
+
+
+    Route::get('volkswagens', [VolkswagenController::class, 'index'])->name('volkswagens');
+    Route::post('volkswagens', [VolkswagenController::class, 'store'])->name('volkswagens.store');
+    Route::post('volkswagens/{volkswagen}', [VolkswagenController::class, 'update'])->name('volkswagens.update');
+    Route::delete('volkswagens/{volkswagen}', [VolkswagenController::class, 'destroy'])->name('volkswagens.destroy');
 });
 
 require __DIR__.'/settings.php';

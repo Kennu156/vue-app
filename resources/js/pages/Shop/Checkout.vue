@@ -2,6 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/vue3';
+import axios from 'axios';
 import { onMounted, ref } from 'vue';
 
 interface CartItem {
@@ -22,11 +23,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Maksmine', href: '/checkout' },
 ];
 
-const stripe        = ref<any>(null);
-const cardElement   = ref<any>(null);
-const cardError     = ref('');
-const processing    = ref(false);
-const cardMounted   = ref(false);
+const stripe      = ref<any>(null);
+const cardElement = ref<any>(null);
+const cardError   = ref('');
+const processing  = ref(false);
+const cardMounted = ref(false);
 
 const form = useForm({
     first_name:        '',
@@ -36,16 +37,16 @@ const form = useForm({
     payment_intent_id: '',
 });
 
-onMounted(async () => {
-    const script    = document.createElement('script');
-    script.src      = 'https://js.stripe.com/v3/';
-    script.onload   = () => initStripe();
+onMounted(() => {
+    const script  = document.createElement('script');
+    script.src    = 'https://js.stripe.com/v3/';
+    script.onload = () => initStripe();
     document.head.appendChild(script);
 });
 
 function initStripe() {
-    stripe.value = (window as any).Stripe(props.stripeKey);
-    const elements = stripe.value.elements();
+    stripe.value      = (window as any).Stripe(props.stripeKey);
+    const elements    = stripe.value.elements();
     cardElement.value = elements.create('card', {
         style: {
             base: {
@@ -68,14 +69,8 @@ async function submit() {
     cardError.value  = '';
 
     try {
-        const res    = await fetch(route('checkout.intent'), {
-            method:  'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as any)?.content,
-            },
-        });
-        const { clientSecret } = await res.json();
+        const res            = await axios.post(route('checkout.intent'));
+        const { clientSecret } = res.data;
 
         const { error, paymentIntent } = await stripe.value.confirmCardPayment(clientSecret, {
             payment_method: { card: cardElement.value },
@@ -92,8 +87,8 @@ async function submit() {
             onFinish: () => { processing.value = false; },
         });
 
-    } catch (e) {
-        cardError.value  = 'Tehniline viga. Proovi uuesti.';
+    } catch (e: any) {
+        cardError.value  = e?.response?.data?.message ?? 'Tehniline viga. Proovi uuesti.';
         processing.value = false;
     }
 }
@@ -135,6 +130,7 @@ async function submit() {
                         <input v-model="form.last_name" type="text" required
                             class="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm
                                    focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                        <p v-if="form.errors.last_name" class="mt-1 text-xs text-red-500">{{ form.errors.last_name }}</p>
                     </div>
                 </div>
 
@@ -151,6 +147,7 @@ async function submit() {
                     <input v-model="form.phone" type="tel" required
                         class="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm
                                focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    <p v-if="form.errors.phone" class="mt-1 text-xs text-red-500">{{ form.errors.phone }}</p>
                 </div>
 
                 <div>

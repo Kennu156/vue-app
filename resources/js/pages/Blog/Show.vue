@@ -106,7 +106,7 @@ const canEditPost = authUser.id === props.post.user.id || authUser.is_admin;
                         <div v-if="canEditPost" class="flex gap-2 shrink-0">
                             <button type="button" @click="editing = true"
                                 class="rounded-lg border border-border px-3 py-1.5 text-xs transition hover:bg-muted">
-                                ✏️ Muuda
+                                Muuda
                             </button>
                             <button type="button" @click="deletePost"
                                 class="rounded-lg border border-destructive/40 px-3 py-1.5 text-xs text-destructive
