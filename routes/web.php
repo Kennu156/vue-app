@@ -8,6 +8,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ApiKeyController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -49,6 +50,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('volkswagens', [VolkswagenController::class, 'store'])->name('volkswagens.store');
     Route::post('volkswagens/{volkswagen}', [VolkswagenController::class, 'update'])->name('volkswagens.update');
     Route::delete('volkswagens/{volkswagen}', [VolkswagenController::class, 'destroy'])->name('volkswagens.destroy');
+
+    Route::get('api-keys', [ApiKeyController::class, 'index'])->name('api-keys');
+    Route::post('api-keys', [ApiKeyController::class, 'store'])->name('api-keys.store');
+    Route::delete('api-keys/{apiKey}', [ApiKeyController::class, 'destroy'])->name('api-keys.destroy');
 });
 
 require __DIR__.'/settings.php';

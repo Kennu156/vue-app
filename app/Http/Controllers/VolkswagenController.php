@@ -14,9 +14,15 @@ class VolkswagenController extends Controller
         $cars = Cache::remember('volkswagens-all', 300, fn () =>
             Volkswagen::with('user')->latest()->get()
         );
-
+    
+        $apiKeys = \App\Models\ApiKey::where('user_id', auth()->id())
+            ->latest()
+        ->get();
+    
         return Inertia::render('Volkswagens/Index', [
-            'cars' => $cars,
+            'cars'    => $cars,
+            'apiKey'  => $apiKeys->first()?->key,
+            'apiKeys' => $apiKeys,
         ]);
     }
 
@@ -57,7 +63,7 @@ class VolkswagenController extends Controller
             'mileage'     => 'required|integer|min:0',
             'price'       => 'required|numeric|min:0',
             'color'       => 'nullable|string|max:50',
-            'image'       => 'nullable|image',
+            'image'       => 'nullable|image|max:4096',
         ]);
 
         if ($request->hasFile('image')) {

@@ -35,6 +35,11 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    public function apiKeys(): HasMany
+    {
+        return $this->hasMany(\App\Models\ApiKey::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *

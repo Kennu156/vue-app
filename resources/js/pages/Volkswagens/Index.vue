@@ -19,7 +19,44 @@ interface Car {
     user: { id: number; name: string };
 }
 
-const props = defineProps<{ cars: Car[] }>();
+
+const selectedCar = ref<Car | null>(null);
+
+const props = defineProps<{
+    cars: Car[];
+    apiKey?: string | null;
+    apiKeys?: { id: number; name: string; key: string; last_used_at: string | null }[];
+}>();
+
+const showApiKeys   = ref(false);
+const copiedKey     = ref<number | null>(null);
+const apiKeyForm    = useForm({ name: '' });
+
+function submitApiKey() {
+    apiKeyForm.post(route('api-keys.store'), {
+        preserveScroll: true,
+        onSuccess: () => apiKeyForm.reset(),
+    });
+}
+
+function deleteApiKey(id: number) {
+    if (!confirm('Kustuta API võti?')) return;
+    router.delete(route('api-keys.destroy', id), { preserveScroll: true });
+}
+
+function copyKey(key: string, id: number) {
+    navigator.clipboard.writeText(key);
+    copiedKey.value = id;
+    setTimeout(() => { copiedKey.value = null; }, 2000);
+}
+
+function openApi() {
+    if (!props.apiKey) {
+        showApiKeys.value = true;
+        return;
+    }
+    window.open(`/api/volkswagens?api_key=${props.apiKey}`, '_blank');
+}
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -133,6 +170,8 @@ function formatPrice(p: number) {
 function formatMileage(m: number) {
     return new Intl.NumberFormat('et-EE').format(m) + ' km';
 }
+
+
 </script>
 
 <template>
@@ -146,10 +185,14 @@ function formatMileage(m: number) {
                     <p class="text-sm text-muted-foreground">{{ filtered.length }} autot</p>
                 </div>
                 <div class="flex gap-2">
-                    <a href="/api/volkswagens" target="_blank"
+                    <button type="button" @click="showApiKeys = !showApiKeys"
                         class="rounded-xl border border-border px-3 py-2 text-xs font-medium transition hover:bg-muted">
-                        API
-                    </a>
+                        🔑 API võtmed
+                    </button>
+                    <button type="button" @click="openApi"
+                        class="rounded-xl border border-border px-3 py-2 text-xs font-medium transition hover:bg-muted">
+                        {{ apiKey ? '📄 Testi API' : '📄 API' }}
+                    </button>
                     <button type="button" @click="openAdd"
                         class="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground
                                shadow-sm transition hover:bg-primary/90">
@@ -192,6 +235,70 @@ function formatMileage(m: number) {
                 </button>
             </div>
 
+            <Transition name="fade">
+                <div v-if="showApiKeys"
+                    class="mb-6 rounded-2xl border border-border bg-card p-5 shadow-sm">
+            
+                    <div class="mb-4 flex items-center justify-between">
+                        <h2 class="font-semibold">🔑 API võtmed</h2>
+                        <button type="button" @click="showApiKeys = false"
+                            class="rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted">✕</button>
+                    </div>
+                
+                    <form @submit.prevent="submitApiKey" class="mb-4 flex gap-3">
+                        <input v-model="apiKeyForm.name" type="text" required
+                            placeholder="Võtme nimi (nt. Minu rakendus)"
+                            class="flex-1 rounded-xl border border-border bg-background px-3 py-2 text-sm
+                                   focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                        <button type="submit" :disabled="apiKeyForm.processing"
+                            class="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground
+                                   transition hover:bg-primary/90 disabled:opacity-50">
+                            + Genereeri
+                        </button>
+                    </form>
+                
+                    <div v-if="!apiKeys?.length"
+                        class="py-4 text-center text-sm text-muted-foreground">
+                        Võtmeid pole. Genereeri esimene!
+                    </div>
+                
+                    <ul v-else class="space-y-2">
+                        <li v-for="k in apiKeys" :key="k.id"
+                            class="flex items-center gap-3 rounded-xl border border-border bg-background p-3">
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium">{{ k.name }}</p>
+                                <code class="mt-0.5 block truncate font-mono text-xs text-muted-foreground">
+                                    {{ k.key }}
+                                </code>
+                            </div>
+                            <button type="button" @click="copyKey(k.key, k.id)"
+                                class="shrink-0 rounded-lg border border-border px-2 py-1 text-xs transition hover:bg-muted">
+                                {{ copiedKey === k.id ? '✅' : '📋' }}
+                            </button>
+                            <button type="button" @click="deleteApiKey(k.id)"
+                                class="shrink-0 rounded-lg border border-destructive/40 px-2 py-1 text-xs
+                                       text-destructive transition hover:bg-destructive/10">
+                                🗑
+                            </button>
+                        </li>
+                    </ul>
+                
+                    <div v-if="apiKey" class="mt-4 rounded-xl bg-muted p-3">
+                        <p class="mb-2 text-xs font-medium">Kiirlingid:</p>
+                        <div class="space-y-1 font-mono text-xs text-muted-foreground">
+                            <a :href="`/api/volkswagens?api_key=${apiKey}`" target="_blank"
+                                class="block truncate hover:text-primary">
+                                /api/volkswagens?api_key={{ apiKey }}
+                            </a>
+                            <a :href="`/api/volkswagens/models?api_key=${apiKey}`" target="_blank"
+                                class="block truncate hover:text-primary">
+                                /api/volkswagens/models?api_key={{ apiKey }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </Transition>
+
             <div v-if="filtered.length === 0"
                 class="rounded-2xl border border-border bg-card p-12 text-center text-muted-foreground">
                 <p class="mt-3 text-sm">Autosid ei leitud.</p>
@@ -200,10 +307,13 @@ function formatMileage(m: number) {
             <div v-else class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 <div v-for="car in filtered" :key="car.id"
                     class="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm
-                           transition hover:shadow-md">
+                           transition hover:shadow-md cursor-pointer"
+                    @click="selectedCar = car">
 
                     <div class="relative h-48 bg-muted">
-                        <img v-if="car.image" :src="car.image" :alt="car.title"
+                        <img v-if="car.image"
+                            :src="`/storage/${car.image}`"
+                            :alt="car.title"
                             class="h-full w-full object-cover" />
                         <div v-else class="flex h-full items-center justify-center text-5xl">🚗</div>
 
@@ -213,7 +323,7 @@ function formatMileage(m: number) {
 
                         <div v-if="car.color"
                             class="absolute right-2 top-2 rounded-lg bg-black/70 px-2 py-1 text-xs text-white">
-                            🎨 {{ car.color }}
+                            {{ car.color }}
                         </div>
                     </div>
 
@@ -236,7 +346,7 @@ function formatMileage(m: number) {
                         </p>
 
                         <div class="mt-3 flex items-center justify-between">
-                            <p class="text-xs text-muted-foreground/60">✍️ {{ car.user.name }}</p>
+                            <p class="text-xs text-muted-foreground/60">👤{{ car.user.name }}</p>
                             <div v-if="canEdit(car)" class="flex gap-1">
                                 <button type="button" @click="openEdit(car)"
                                     class="rounded-lg border border-border px-2 py-1 text-xs transition hover:bg-muted">
@@ -253,18 +363,95 @@ function formatMileage(m: number) {
                 </div>
             </div>
 
-            <div class="mt-8 rounded-2xl border border-border bg-card p-5">
-                <h2 class="mb-3 font-semibold">📄 API dokumentatsioon</h2>
-                <div class="space-y-1.5 font-mono text-xs text-muted-foreground">
-                    <p><span class="text-green-500">GET</span> /api/volkswagens</p>
-                    <p><span class="text-green-500">GET</span> /api/volkswagens?search=golf</p>
-                    <p><span class="text-green-500">GET</span> /api/volkswagens?model=Golf&sort=price&order=asc</p>
-                    <p><span class="text-green-500">GET</span> /api/volkswagens?year=2020&limit=5</p>
-                    <p><span class="text-green-500">GET</span> /api/volkswagens/models</p>
-                    <p><span class="text-green-500">GET</span> /api/volkswagens/{id}</p>
+            <div class="mt-8 rounded-2xl border border-border bg-card p-5 shadow-sm">
+                <h2 class="mb-4 font-semibold text-lg">📄 API dokumentatsioon</h2>
+
+                <div v-if="!apiKey"
+                    class="mb-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50
+                           px-4 py-3 text-sm dark:border-amber-800 dark:bg-amber-950">
+                    <span>⚠️</span>
+                    <span>API kasutamiseks on vaja võtit. </span>
+                    <a href="/api-keys" class="font-medium underline underline-offset-2">Genereeri võti →</a>
+                </div>
+            
+                <div v-else class="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3
+                                   dark:border-green-800 dark:bg-green-950">
+                    <p class="text-xs font-medium text-green-700 dark:text-green-400">✅ Sinu API võti:</p>
+                    <code class="mt-1 block text-xs font-mono text-green-600 dark:text-green-500 break-all">
+                        {{ apiKey }}
+                    </code>
+                </div>
+            
+                <div class="space-y-4">
+                
+                    <div>
+                        <p class="mb-2 text-sm font-semibold">Kõik autod</p>
+                        <div class="rounded-lg bg-muted px-3 py-2 font-mono text-xs break-all">
+                            /api/volkswagens?api_key={{ apiKey ?? 'SINU_VÕTI' }}
+                        </div>
+                    </div>
+                
+                    <div>
+                        <p class="mb-2 text-sm font-semibold">Otsimine</p>
+                        <div class="rounded-lg bg-muted px-3 py-2 font-mono text-xs break-all">
+                            /api/volkswagens?api_key={{ apiKey ?? 'SINU_VÕTI' }}&search=golf
+                        </div>
+                    </div>
+                
+                    <div>
+                        <p class="mb-2 text-sm font-semibold">Filtreeri mudeli järgi</p>
+                        <div class="rounded-lg bg-muted px-3 py-2 font-mono text-xs break-all">
+                            /api/volkswagens?api_key={{ apiKey ?? 'SINU_VÕTI' }}&model=Golf
+                        </div>
+                    </div>
+                
+                    <div>
+                        <p class="mb-2 text-sm font-semibold">Filtreeri aasta järgi</p>
+                        <div class="rounded-lg bg-muted px-3 py-2 font-mono text-xs break-all">
+                            /api/volkswagens?api_key={{ apiKey ?? 'SINU_VÕTI' }}&year=2020
+                        </div>
+                    </div>
+                
+                    <div>
+                        <p class="mb-2 text-sm font-semibold">Sorteerimine</p>
+                        <div class="rounded-lg bg-muted px-3 py-2 font-mono text-xs break-all">
+                            /api/volkswagens?api_key={{ apiKey ?? 'SINU_VÕTI' }}&sort=price&order=asc
+                        </div>
+                        <p class="mt-1 text-xs text-muted-foreground">
+                            sort valikud: <code>title</code> · <code>year</code> · <code>price</code> · <code>mileage</code> · <code>created_at</code>
+                        </p>
+                    </div>
+                
+                    <div>
+                        <p class="mb-2 text-sm font-semibold">Piira tulemusi</p>
+                        <div class="rounded-lg bg-muted px-3 py-2 font-mono text-xs break-all">
+                            /api/volkswagens?api_key={{ apiKey ?? 'SINU_VÕTI' }}&limit=5
+                        </div>
+                        <p class="mt-1 text-xs text-muted-foreground">Vaikimisi: 20 · Maksimum: 100</p>
+                    </div>
+                
+                    <div>
+                        <p class="mb-2 text-sm font-semibold">Üksik auto</p>
+                        <div class="rounded-lg bg-muted px-3 py-2 font-mono text-xs break-all">
+                            /api/volkswagens/1?api_key={{ apiKey ?? 'SINU_VÕTI' }}
+                        </div>
+                    </div>
+                
+                    <div>
+                        <p class="mb-2 text-sm font-semibold">Kõik mudelid</p>
+                        <div class="rounded-lg bg-muted px-3 py-2 font-mono text-xs break-all">
+                            /api/volkswagens/models?api_key={{ apiKey ?? 'SINU_VÕTI' }}
+                        </div>
+                    </div>
+                
+                    <div>
+                        <p class="mb-2 text-sm font-semibold">Kõik filtrid korraga</p>
+                        <div class="rounded-lg bg-muted px-3 py-2 font-mono text-xs break-all">
+                            /api/volkswagens?api_key={{ apiKey ?? 'SINU_VÕTI' }}&model=Golf&sort=price&order=asc&limit=5
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
         <Transition name="fade">
             <div v-if="showForm" @click="showForm = false"
@@ -372,6 +559,87 @@ function formatMileage(m: number) {
                         </button>
                     </div>
                 </form>
+            </div>
+        </Transition>
+    </div>
+        <Transition name="fade">
+            <div v-if="selectedCar && !showForm"
+                @click="selectedCar = null"
+                class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" />
+        </Transition>
+
+        <Transition name="slide">
+            <div v-if="selectedCar && !showForm"
+                class="fixed inset-x-4 top-1/2 z-50 -translate-y-1/2 w-full max-w-lg
+                       rounded-2xl border border-border bg-background shadow-2xl overflow-hidden
+                       sm:left-1/2 sm:-translate-x-1/2">
+        
+                <div class="relative h-56 bg-muted">
+                    <img v-if="selectedCar.image"
+                        :src="`/storage/${selectedCar.image}`"
+                        :alt="selectedCar.title"
+                        class="h-full w-full object-cover" />
+                    <div v-else class="flex h-full items-center justify-center text-5xl">🚗</div>
+                    <button type="button" @click="selectedCar = null"
+                        class="absolute right-3 top-3 rounded-full bg-black/50 p-1.5 text-white
+                               transition hover:bg-black/70">✕</button>
+                
+                    <div class="absolute left-3 bottom-3 rounded-xl bg-black/70 px-3 py-1.5">
+                        <span class="text-lg font-bold text-white">{{ formatPrice(selectedCar.price) }}</span>
+                    </div>
+                
+                    <div v-if="selectedCar.color"
+                        class="absolute right-3 bottom-3 rounded-lg bg-black/70 px-2 py-1 text-xs text-white">
+                        {{ selectedCar.color }}
+                    </div>
+                </div>
+            
+                <div class="p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <h2 class="text-xl font-bold">{{ selectedCar.title }}</h2>
+                        <span class="shrink-0 rounded-full bg-muted px-3 py-1 text-sm font-medium">
+                            {{ selectedCar.year }}
+                        </span>
+                    </div>
+                
+                    <div class="mt-3 grid grid-cols-2 gap-2">
+                        <div class="rounded-xl bg-muted px-3 py-2">
+                            <p class="text-xs text-muted-foreground">Mudel</p>
+                            <p class="font-medium text-sm">{{ selectedCar.model }}</p>
+                        </div>
+                        <div class="rounded-xl bg-muted px-3 py-2">
+                            <p class="text-xs text-muted-foreground">Mootor</p>
+                            <p class="font-medium text-sm">{{ selectedCar.engine }}</p>
+                        </div>
+                        <div class="rounded-xl bg-muted px-3 py-2">
+                            <p class="text-xs text-muted-foreground">Läbisõit</p>
+                            <p class="font-medium text-sm">{{ formatMileage(selectedCar.mileage) }}</p>
+                        </div>
+                        <div class="rounded-xl bg-muted px-3 py-2">
+                            <p class="text-xs text-muted-foreground">Lisaja</p>
+                            <p class="font-medium text-sm truncate">{{ selectedCar.user.name }}</p>
+                        </div>
+                    </div>
+                
+                    <p class="mt-3 text-sm text-muted-foreground leading-relaxed">
+                        {{ selectedCar.description }}
+                    </p>
+                
+                    <div v-if="canEdit(selectedCar)" class="mt-4 flex gap-2">
+                        <button type="button"
+                            @click="openEdit(selectedCar); selectedCar = null"
+                            class="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium
+                                   transition hover:bg-muted">
+                            ✏️ Muuda
+                        </button>
+                        <button type="button"
+                            @click="deleteCar(selectedCar); selectedCar = null"
+                            class="rounded-xl border border-destructive/40 px-4 py-2.5 text-sm font-medium
+                                   text-destructive transition hover:bg-destructive/10">
+                            🗑 Kustuta
+                        </button>
+                    </div>
+                </div>
             </div>
         </Transition>
     </AppLayout>

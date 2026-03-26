@@ -13,6 +13,8 @@ interface Product {
     category: string;
 }
 
+const selectedProduct = ref<Product | null>(null);
+
 const props = defineProps<{ products: Product[] }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -87,7 +89,8 @@ const filtered = () => activeCategory.value === 'kõik'
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 <div v-for="product in filtered()" :key="product.id"
                     class="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm
-                           transition hover:shadow-md">
+                           transition hover:shadow-md cursor-pointer"
+                    @click="selectedProduct = product">
 
                     <img :src="product.image" :alt="product.name"
                         class="h-48 w-full object-cover" />
@@ -132,5 +135,69 @@ const filtered = () => activeCategory.value === 'kõik'
                 </div>
             </div>
         </div>
+        <Transition name="fade">
+        <div v-if="selectedProduct"
+            @click="selectedProduct = null"
+            class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" />
+    </Transition>
+    
+    <Transition name="slide">
+        <div v-if="selectedProduct"
+            class="fixed inset-x-4 top-1/2 z-50 -translate-y-1/2 w-full max-w-lg
+                   rounded-2xl border border-border bg-background shadow-2xl overflow-hidden
+                   sm:left-1/2 sm:-translate-x-1/2">
+    
+            <div class="relative h-56 bg-muted">
+                <img v-if="selectedProduct.image"
+                    :src="selectedProduct.image"
+                    :alt="selectedProduct.name"
+                    class="h-full w-full object-cover" />
+                <div v-else class="flex h-full items-center justify-center text-5xl">🛍️</div>
+                <button type="button" @click="selectedProduct = null"
+                    class="absolute right-3 top-3 rounded-full bg-black/50 p-1.5 text-white
+                           transition hover:bg-black/70">✕</button>
+                <span class="absolute left-3 top-3 rounded-full bg-primary px-3 py-1 text-xs
+                             font-medium text-primary-foreground">
+                    {{ selectedProduct.category }}
+                </span>
+            </div>
+        
+            <div class="p-5">
+                <div class="flex items-start justify-between gap-3">
+                    <h2 class="text-xl font-bold">{{ selectedProduct.name }}</h2>
+                    <span class="shrink-0 text-2xl font-bold text-primary">
+                        {{ selectedProduct.price.toFixed(2) }} €
+                    </span>
+                </div>
+            
+                <p class="mt-3 text-sm text-muted-foreground leading-relaxed">
+                    {{ selectedProduct.description }}
+                </p>
+            
+                <div class="mt-5 flex items-center gap-3">
+                    <div class="flex items-center gap-1">
+                        <button type="button"
+                            @click.stop="setQty(selectedProduct.id, getQty(selectedProduct.id) - 1)"
+                            class="flex h-9 w-9 items-center justify-center rounded-xl border border-border
+                                   text-lg transition hover:bg-muted">−</button>
+                        <span class="w-8 text-center font-medium">{{ getQty(selectedProduct.id) }}</span>
+                        <button type="button"
+                            @click.stop="setQty(selectedProduct.id, getQty(selectedProduct.id) + 1)"
+                            class="flex h-9 w-9 items-center justify-center rounded-xl border border-border
+                                   text-lg transition hover:bg-muted">+</button>
+                    </div>
+                
+                    <button type="button"
+                        @click.stop="addToCart(selectedProduct); selectedProduct = null"
+                        :disabled="form.processing"
+                        class="flex-1 rounded-xl bg-primary py-2.5 text-sm font-medium
+                               text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50">
+                        🛒 Lisa korvi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </Transition>
     </AppLayout>
+    
 </template>
