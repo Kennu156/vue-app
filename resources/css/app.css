@@ -2,84 +2,167 @@
 @tailwind components;
 @tailwind utilities;
 
-body,
-html {
-    --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-}
-
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
 
 @layer base {
     :root {
-      --background: 0 0% 100%;
-      --foreground: 222.2 84% 4.9%;
-    
-      --card: 0 0% 100%;
-      --card-foreground: 222.2 84% 4.9%;
-    
-      --popover: 0 0% 100%;
-      --popover-foreground: 222.2 84% 4.9%;
-    
-      --primary: 221.2 83.2% 53.3%;
-      --primary-foreground: 210 40% 98%;
-    
-      --secondary: 210 40% 96.1%;
-      --secondary-foreground: 222.2 47.4% 11.2%;
-    
-      --muted: 210 40% 96.1%;
-      --muted-foreground: 215.4 16.3% 46.9%;
-    
-      --accent: 210 40% 96.1%;
-      --accent-foreground: 222.2 47.4% 11.2%;
-    
-      --destructive: 0 84.2% 60.2%;
-      --destructive-foreground: 210 40% 98%;
-    
-      --border:214.3 31.8% 91.4%;
-      --input:214.3 31.8% 91.4%;
-      --ring:221.2 83.2% 53.3%;
-      --radius: 0.5rem;
-    }
-     
-    .dark {
-      --background:222.2 84% 4.9%;
-      --foreground:210 40% 98%;
-    
-      --card:222.2 84% 4.9%;
-      --card-foreground:210 40% 98%;
-    
-      --popover:222.2 84% 4.9%;
-      --popover-foreground:210 40% 98%;
-    
-      --primary:217.2 91.2% 59.8%;
-      --primary-foreground:222.2 47.4% 11.2%;
-    
-      --secondary:217.2 32.6% 17.5%;
-      --secondary-foreground:210 40% 98%;
-    
-      --muted:217.2 32.6% 17.5%;
-      --muted-foreground:215 20.2% 65.1%;
-    
-      --accent:217.2 32.6% 17.5%;
-      --accent-foreground:210 40% 98%;
-    
-      --destructive:0 62.8% 30.6%;
-      --destructive-foreground:210 40% 98%;
-    
-      --border:217.2 32.6% 17.5%;
-      --input:217.2 32.6% 17.5%;
-      --ring:224.3 76.3% 48%;
+        /* ── HSL values — required by tailwind.config.js ──────────────────── */
 
-    }
-  }
-  
+        /* Backgrounds */
+        --background:  240 8% 6%;          /* #0e0e10 near black */
+        --card:        240 8% 8%;          /* #121215 dark card */
+        --popover:     240 8% 9%;
+        --muted:       240 7% 9%;          /* #16161a */
+        --accent:      240 6% 11%;         /* #1c1c20 */
+        --secondary:   240 6% 12%;
 
-@layer base {
-    * {
-        @apply border-border;
+        /* Text — 4 clear levels */
+        --foreground:           40 10% 87%;     /* #dedad4 — warm white, headings */
+        --card-foreground:      40 8% 80%;      /* #cac8c2 — body text on cards */
+        --popover-foreground:   40 8% 80%;
+        --secondary-foreground: 40 6% 60%;      /* #9e9c96 — secondary info */
+        --muted-foreground:     40 4% 45%;      /* #767370 — labels, metadata */
+        --accent-foreground:    40 8% 80%;
+
+        /* Gold primary */
+        --primary:            42 62% 55%;       /* #d4a843 gold */
+        --primary-foreground: 240 8% 5%;        /* near black */
+
+        /* Destructive */
+        --destructive:            0 55% 55%;
+        --destructive-foreground: 40 10% 87%;
+
+        /* Borders & inputs */
+        --border: 240 5% 16%;      /* subtle separator */
+        --input:  240 5% 14%;
+        --ring:   42 62% 55%;
+
+        /* Sidebar */
+        --sidebar-background:         240 8% 5%;
+        --sidebar-foreground:         40 5% 55%;     /* nav items — readable */
+        --sidebar-primary:            42 62% 55%;    /* gold */
+        --sidebar-primary-foreground: 240 8% 5%;
+        --sidebar-accent:             240 7% 9%;
+        --sidebar-accent-foreground:  40 8% 80%;
+        --sidebar-border:             240 5% 12%;
+        --sidebar-ring:               42 62% 55%;
+
+        --radius: 0.5rem;
+        --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+        --font-display: 'Bebas Neue', sans-serif;
+    }
+
+    /* No light mode — always dark */
+    .dark { color-scheme: dark; }
+
+    * { @apply border-border; }
+
+    html {
+        background: hsl(240 8% 5%);
+        color-scheme: dark;
     }
 
     body {
-        @apply bg-background text-foreground;
+        font-family: var(--font-sans);
+        @apply bg-background text-foreground antialiased;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: hsl(240 8% 5%); }
+    ::-webkit-scrollbar-thumb { background: hsl(240 5% 18%); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: hsl(240 5% 25%); }
+
+    ::selection { background: hsla(42,62%,55%,0.2); color: hsl(40 10% 87%); }
+    :focus-visible { outline: 2px solid hsla(42,62%,55%,0.6); outline-offset: 2px; }
+}
+
+@layer utilities {
+    .font-display { font-family: var(--font-display); }
+
+    /* Named text tiers — use in components */
+    .text-bright  { color: hsl(40 10% 87%); }   /* L1 — headings */
+    .text-body    { color: hsl(40 8% 75%); }     /* L2 — paragraphs */
+    .text-sub     { color: hsl(40 6% 58%); }     /* L3 — secondary */
+    .text-meta    { color: hsl(40 4% 42%); }     /* L4 — timestamps, labels */
+    .text-dim     { color: hsl(40 3% 28%); }     /* L5 — very muted */
+    .text-gold    { color: hsl(42 62% 55%); }
+
+    .bg-gold { background: hsl(42 62% 55%); }
+
+    /* Noise overlay */
+    .noise-overlay::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 9999;
+        opacity: 0.025;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        background-size: 200px;
     }
 }
+
+/* ── Sidebar overrides ─────────────────────────────────────────────────────── */
+[data-sidebar="sidebar"] {
+    background: hsl(240 8% 5%) !important;
+    border-right: 1px solid hsl(240 5% 12%) !important;
+}
+[data-sidebar="menu-button"] {
+    border-radius: 6px !important;
+    color: hsl(40 5% 52%) !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.02em;
+    transition: all 0.15s !important;
+}
+[data-sidebar="menu-button"]:hover {
+    background: hsl(240 7% 10%) !important;
+    color: hsl(40 8% 78%) !important;
+}
+[data-sidebar="menu-button"][data-active="true"] {
+    background: hsl(240 7% 10%) !important;
+    border-left: 2px solid hsl(42 62% 55%) !important;
+    padding-left: calc(0.75rem - 2px) !important;
+    color: hsl(42 62% 55%) !important;
+}
+[data-sidebar="group-label"] {
+    color: hsl(40 4% 28%) !important;
+    font-size: 0.6rem !important;
+    letter-spacing: 0.2em !important;
+    text-transform: uppercase !important;
+}
+[data-sidebar="inset"] { background: hsl(240 8% 6%) !important; }
+
+/* ── Inputs ────────────────────────────────────────────────────────────────── */
+input, textarea, select {
+    background: hsl(240 8% 7%) !important;
+    border-color: hsl(240 5% 15%) !important;
+    color: hsl(40 8% 78%) !important;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+input:focus, textarea:focus, select:focus {
+    border-color: hsla(42,62%,55%,0.5) !important;
+    box-shadow: 0 0 0 3px hsla(42,62%,55%,0.08) !important;
+    outline: none !important;
+}
+input::placeholder, textarea::placeholder {
+    color: hsl(40 4% 32%) !important;
+}
+
+/* ── Animations ────────────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+@keyframes shimmer {
+    0%, 100% { opacity: 0.3; }
+    50%       { opacity: 0.6; }
+}
+
+.animate-fade-up { animation: fadeUp 0.45s ease both; }
+.animate-fade-in { animation: fadeIn 0.3s ease both; }
+.animate-shimmer { animation: shimmer 1.8s ease-in-out infinite; }
