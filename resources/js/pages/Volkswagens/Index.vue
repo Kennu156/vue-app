@@ -28,8 +28,69 @@ const props = defineProps<{
     apiKeys?: { id: number; name: string; key: string; last_used_at: string | null }[];
 }>();
 
-const showApiKeys   = ref(false);
-const copiedKey     = ref<number | null>(null);
+const showApiKeys    = ref(false);
+const copiedKey      = ref<number | null>(null);
+const showExternalApi  = ref(false);
+const extUrl           = ref('');
+const extKey           = ref('');
+const extItems         = ref<Record<string, any>[]>([]);
+const extRaw           = ref<string | null>(null);
+const extError         = ref<string | null>(null);
+const extLoading       = ref(false);
+const extSelectedItem  = ref<Record<string, any> | null>(null);
+
+function extractItems(data: any): Record<string, any>[] {
+    if (Array.isArray(data)) return data;
+    for (const val of Object.values(data)) {
+        if (Array.isArray(val) && val.length > 0 && typeof val[0] === 'object') return val;
+    }
+    return [];
+}
+
+function itemImage(item: Record<string, any>): string | null {
+    return item.image ?? item.img ?? item.photo ?? item.thumbnail ?? item.picture ?? item.avatar ?? null;
+}
+
+function itemTitle(item: Record<string, any>): string {
+    return item.title ?? item.name ?? item.label ?? item.make ?? item.brand ?? Object.values(item)[0] ?? '';
+}
+
+function itemSubtitle(item: Record<string, any>): string {
+    return item.subtitle ?? item.description ?? item.model ?? item.category ?? item.type ?? '';
+}
+
+function itemPrice(item: Record<string, any>): string | null {
+    const p = item.price ?? item.cost ?? item.amount ?? item.value;
+    return p != null ? String(p) : null;
+}
+
+async function fetchExternal() {
+    extItems.value  = [];
+    extRaw.value    = null;
+    extError.value  = null;
+    extLoading.value = true;
+    try {
+        const url = new URL(extUrl.value);
+        if (extKey.value) url.searchParams.set('api_key', extKey.value);
+        const res  = await fetch(url.toString());
+        const text = await res.text();
+        try {
+            const parsed = JSON.parse(text);
+            const items  = extractItems(parsed);
+            if (items.length > 0) {
+                extItems.value = items;
+            } else {
+                extRaw.value = JSON.stringify(parsed, null, 2);
+            }
+        } catch {
+            extRaw.value = text;
+        }
+    } catch (e: any) {
+        extError.value = e.message ?? 'Viga päringu tegemisel';
+    } finally {
+        extLoading.value = false;
+    }
+}
 const apiKeyForm    = useForm({ name: '' });
 
 function submitApiKey() {
@@ -41,7 +102,7 @@ function submitApiKey() {
 
 function deleteApiKey(id: number) {
     if (!confirm('Kustuta API võti?')) return;
-    router.delete(route('api-keys.destroy', id), { preserveScroll: true });
+    router.delete(route('api-keys.destroy', { id }), { preserveScroll: true });
 }
 
 function copyKey(key: string, id: number) {
@@ -68,7 +129,7 @@ const authUser = (page.props.auth as any).user;
 
 const search      = ref('');
 const modelFilter = ref('');
-const sortBy      = ref('created_at');
+const sortBy      = ref('id');
 const sortOrder   = ref('desc');
 
 const models = computed(() => [...new Set(props.cars.map(c => c.model))].sort());
@@ -90,7 +151,8 @@ const filtered = computed(() => {
         const av = (a as any)[sortBy.value];
         const bv = (b as any)[sortBy.value];
         const cmp = typeof av === 'string' ? av.localeCompare(bv) : av - bv;
-        return sortOrder.value === 'asc' ? cmp : -cmp;
+        const ordered = sortOrder.value === 'asc' ? cmp : -cmp;
+        return ordered !== 0 ? ordered : a.id - b.id;
     });
 
     return list;
@@ -150,13 +212,14 @@ function submitForm() {
         onSuccess: () => { showForm.value = false; form.reset(); previewUrl.value = null; },
     };
     editCar.value
-        ? form.post(route('volkswagens.update', editCar.value.id), opts)
+        ? form.post(route('volkswagens.update', { volkswagen: editCar.value.id }), opts)
         : form.post(route('volkswagens.store'), opts);
 }
 
 function deleteCar(c: Car) {
     if (!confirm(`Kustuta "${c.title}"?`)) return;
-    router.delete(route('volkswagens.destroy', c.id), { preserveScroll: true });
+    selectedCar.value = null;
+    router.delete(route('volkswagens.destroy', { volkswagen: c.id }), { preserveScroll: true });
 }
 
 function canEdit(c: Car) {
@@ -193,6 +256,10 @@ function formatMileage(m: number) {
                         class="rounded-xl border border-border px-3 py-2 text-xs font-medium transition hover:bg-muted">
                         {{ apiKey ? '📄 Testi API' : '📄 API' }}
                     </button>
+                    <button type="button" @click="showExternalApi = !showExternalApi"
+                        class="rounded-xl border border-border px-3 py-2 text-xs font-medium transition hover:bg-muted">
+                        🌐 Väline API
+                    </button>
                     <button type="button" @click="openAdd"
                         class="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground
                                shadow-sm transition hover:bg-primary/90">
@@ -216,7 +283,7 @@ function formatMileage(m: number) {
                 <select v-model="sortBy"
                     class="rounded-xl border border-border bg-background px-3 py-2 text-sm
                            focus:outline-none focus:ring-2 focus:ring-primary/50">
-                    <option value="created_at">Lisatud</option>
+                    <option value="id">Lisatud</option>
                     <option value="title">Nimi</option>
                     <option value="year">Aasta</option>
                     <option value="price">Hind</option>
@@ -299,6 +366,87 @@ function formatMileage(m: number) {
                 </div>
             </Transition>
 
+            <Transition name="fade">
+                <div v-if="showExternalApi"
+                    class="mb-6 rounded-2xl border border-border bg-card p-5 shadow-sm">
+
+                    <div class="mb-4 flex items-center justify-between">
+                        <h2 class="font-semibold">🌐 Väline API päring</h2>
+                        <button type="button" @click="showExternalApi = false"
+                            class="rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted">✕</button>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="mb-1 block text-xs font-medium text-muted-foreground">API URL</label>
+                            <input v-model="extUrl" type="url" placeholder="https://api.example.com/data"
+                                class="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm
+                                       focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-xs font-medium text-muted-foreground">API võti (valikuline)</label>
+                            <input v-model="extKey" type="text" placeholder="api_key väärtus"
+                                class="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm
+                                       focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                        </div>
+                        <button type="button" @click="fetchExternal" :disabled="!extUrl || extLoading"
+                            class="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground
+                                   transition hover:bg-primary/90 disabled:opacity-50">
+                            {{ extLoading ? '⏳ Laadin...' : '▶ Päri' }}
+                        </button>
+                    </div>
+
+                    <div v-if="extError"
+                        class="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700
+                               dark:border-red-800 dark:bg-red-950 dark:text-red-400">
+                        ⚠️ {{ extError }}
+                    </div>
+
+                    <!-- Cards view -->
+                    <div v-if="extItems.length > 0" class="mt-4">
+                        <p class="mb-3 text-xs text-muted-foreground">{{ extItems.length }} tulemust</p>
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            <div v-for="(item, i) in extItems" :key="i"
+                                class="flex flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-sm
+                                       cursor-pointer transition hover:shadow-md"
+                                @click="extSelectedItem = extSelectedItem === item ? null : item">
+
+                                <div class="relative h-40 bg-muted">
+                                    <img v-if="itemImage(item)"
+                                        :src="itemImage(item)!"
+                                        :alt="itemTitle(item)"
+                                        class="h-full w-full object-cover"
+                                        @error="($event.target as HTMLImageElement).style.display='none'" />
+                                    <div v-else class="flex h-full items-center justify-center text-4xl">📦</div>
+                                    <div v-if="itemPrice(item)"
+                                        class="absolute left-2 top-2 rounded-lg bg-black/70 px-2 py-1 text-xs font-bold text-white">
+                                        {{ itemPrice(item) }}
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-1 flex-col p-3">
+                                    <p class="font-semibold text-sm leading-tight line-clamp-2">{{ itemTitle(item) }}</p>
+                                    <p v-if="itemSubtitle(item)" class="mt-1 text-xs text-muted-foreground line-clamp-2">{{ itemSubtitle(item) }}</p>
+
+                                    <!-- expanded detail rows -->
+                                    <div v-if="extSelectedItem === item" class="mt-3 space-y-1 border-t border-border pt-3">
+                                        <div v-for="(val, key) in item" :key="key"
+                                            class="flex gap-2 text-xs">
+                                            <span class="shrink-0 font-medium text-muted-foreground w-24 truncate">{{ key }}</span>
+                                            <span class="break-all">{{ val }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Raw JSON fallback -->
+                    <pre v-if="extRaw"
+                        class="mt-4 max-h-96 overflow-auto rounded-xl bg-muted p-4 text-xs font-mono whitespace-pre-wrap break-all">{{ extRaw }}</pre>
+                </div>
+            </Transition>
+
             <div v-if="filtered.length === 0"
                 class="rounded-2xl border border-border bg-card p-12 text-center text-muted-foreground">
                 <p class="mt-3 text-sm">Autosid ei leitud.</p>
@@ -312,7 +460,7 @@ function formatMileage(m: number) {
 
                     <div class="relative h-48 bg-muted">
                         <img v-if="car.image"
-                            :src="`/storage/${car.image}`"
+                            :src="car.image?.startsWith('http') ? car.image : `/storage/${car.image}`"
                             :alt="car.title"
                             class="h-full w-full object-cover" />
                         <div v-else class="flex h-full items-center justify-center text-5xl">🚗</div>
@@ -348,11 +496,11 @@ function formatMileage(m: number) {
                         <div class="mt-3 flex items-center justify-between">
                             <p class="text-xs text-muted-foreground/60">👤{{ car.user.name }}</p>
                             <div v-if="canEdit(car)" class="flex gap-1">
-                                <button type="button" @click="openEdit(car)"
+                                <button type="button" @click.stop="openEdit(car)"
                                     class="rounded-lg border border-border px-2 py-1 text-xs transition hover:bg-muted">
                                     ✏️
                                 </button>
-                                <button type="button" @click="deleteCar(car)"
+                                <button type="button" @click.stop="deleteCar(car)"
                                     class="rounded-lg border border-destructive/40 px-2 py-1 text-xs
                                            text-destructive transition hover:bg-destructive/10">
                                     🗑
@@ -371,7 +519,6 @@ function formatMileage(m: number) {
                            px-4 py-3 text-sm dark:border-amber-800 dark:bg-amber-950">
                     <span>⚠️</span>
                     <span>API kasutamiseks on vaja võtit. </span>
-                    <a href="/api-keys" class="font-medium underline underline-offset-2">Genereeri võti →</a>
                 </div>
             
                 <div v-else class="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3
@@ -576,7 +723,7 @@ function formatMileage(m: number) {
         
                 <div class="relative h-56 bg-muted">
                     <img v-if="selectedCar.image"
-                        :src="`/storage/${selectedCar.image}`"
+                        :src="selectedCar.image?.startsWith('http') ? selectedCar.image : `/storage/${selectedCar.image}`"
                         :alt="selectedCar.title"
                         class="h-full w-full object-cover" />
                     <div v-else class="flex h-full items-center justify-center text-5xl">🚗</div>
@@ -633,7 +780,7 @@ function formatMileage(m: number) {
                             ✏️ Muuda
                         </button>
                         <button type="button"
-                            @click="deleteCar(selectedCar); selectedCar = null"
+                            @click="deleteCar(selectedCar)"
                             class="rounded-xl border border-destructive/40 px-4 py-2.5 text-sm font-medium
                                    text-destructive transition hover:bg-destructive/10">
                             🗑 Kustuta

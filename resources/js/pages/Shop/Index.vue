@@ -109,19 +109,19 @@ const filtered = () => activeCategory.value === 'kõik'
 
                             <div class="flex items-center gap-1">
                                 <button type="button"
-                                    @click="setQty(product.id, getQty(product.id) - 1)"
+                                    @click.stop="setQty(product.id, getQty(product.id) - 1)"
                                     class="flex h-7 w-7 items-center justify-center rounded-lg border border-border
                                            text-sm transition hover:bg-muted">−</button>
                                 <span class="w-6 text-center text-sm font-medium">{{ getQty(product.id) }}</span>
                                 <button type="button"
-                                    @click="setQty(product.id, getQty(product.id) + 1)"
+                                    @click.stop="setQty(product.id, getQty(product.id) + 1)"
                                     class="flex h-7 w-7 items-center justify-center rounded-lg border border-border
                                            text-sm transition hover:bg-muted">+</button>
                             </div>
                         </div>
 
                         <button type="button"
-                            @click="addToCart(product)"
+                            @click.stop="addToCart(product)"
                             :disabled="form.processing"
                             :class="[
                                 'mt-3 w-full rounded-xl py-2 text-sm font-medium transition',

@@ -26,7 +26,7 @@ class VolkswagenSeeder extends Seeder
                 'mileage'     => 145000,
                 'price'       => 12500,
                 'color'       => 'Must',
-                'image'       => null,
+                'image'       => 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/VW_Golf_GTD_%28VII%29_%E2%80%93_Frontansicht%2C_6._April_2014%2C_D%C3%BCsseldorf.jpg/250px-VW_Golf_GTD_%28VII%29_%E2%80%93_Frontansicht%2C_6._April_2014%2C_D%C3%BCsseldorf.jpg',
             ],
             [
                 'title'       => 'VW Passat B8 2.0 TDI 4Motion',
@@ -37,7 +37,7 @@ class VolkswagenSeeder extends Seeder
                 'mileage'     => 98000,
                 'price'       => 22900,
                 'color'       => 'Hõbedane',
-                'image'       => null,
+                'image'       => 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Volkswagen_Passat_Variant_2.0_TDI_%28B8%2C_2018%29_%2852076031771%29.jpg/960px-Volkswagen_Passat_Variant_2.0_TDI_%28B8%2C_2018%29_%2852076031771%29.jpg',
             ],
             [
                 'title'       => 'VW Polo 1.0 TSI Comfortline',
@@ -48,7 +48,7 @@ class VolkswagenSeeder extends Seeder
                 'mileage'     => 62000,
                 'price'       => 14800,
                 'color'       => 'Valge',
-                'image'       => null,
+                'image'       => 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/2019_Volkswagen_Polo_1.6_MSi_Highline.jpg/960px-2019_Volkswagen_Polo_1.6_MSi_Highline.jpg',
             ],
             [
                 'title'       => 'VW Tiguan 2.0 TSI 4Motion R-Line',
@@ -59,7 +59,7 @@ class VolkswagenSeeder extends Seeder
                 'mileage'     => 54000,
                 'price'       => 31500,
                 'color'       => 'Deep Black Pearl',
-                'image'       => null,
+                'image'       => 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/20_Volkswagen_Tiguan_%282020-2024%29_1.jpg/960px-20_Volkswagen_Tiguan_%282020-2024%29_1.jpg',
             ],
             [
                 'title'       => 'VW Touareg 3.0 TDI V6',
@@ -70,7 +70,7 @@ class VolkswagenSeeder extends Seeder
                 'mileage'     => 87000,
                 'price'       => 42000,
                 'color'       => 'Ärihõbe',
-                'image'       => null,
+                'image'       => 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Volkswagen_Touareg_III_IMG_1991.jpg/960px-Volkswagen_Touareg_III_IMG_1991.jpg',
             ],
             [
                 'title'       => 'VW Golf GTI MK8',
@@ -81,7 +81,7 @@ class VolkswagenSeeder extends Seeder
                 'mileage'     => 28000,
                 'price'       => 36900,
                 'color'       => 'Tornado Red',
-                'image'       => null,
+                'image'       => 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/VOLKSWAGEN_GOLF_GTI_%28Mk8_CD1%29_China.jpg/960px-VOLKSWAGEN_GOLF_GTI_%28Mk8_CD1%29_China.jpg',
             ],
             [
                 'title'       => 'VW ID.4 Pro Performance',
@@ -92,7 +92,7 @@ class VolkswagenSeeder extends Seeder
                 'mileage'     => 15000,
                 'price'       => 44900,
                 'color'       => 'Moonstone Grey',
-                'image'       => null,
+                'image'       => 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Volkswagen_ID.4_GTX_IAA_2021_1X7A0247.jpg/960px-Volkswagen_ID.4_GTX_IAA_2021_1X7A0247.jpg',
             ],
             [
                 'title'       => 'VW Caddy 2.0 TDI DSG',
@@ -103,7 +103,7 @@ class VolkswagenSeeder extends Seeder
                 'mileage'     => 73000,
                 'price'       => 24500,
                 'color'       => 'Reflex Silver',
-                'image'       => null,
+                'image'       => 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/2021_Volkswagen_Caddy_%2851161223218%29.jpg/960px-2021_Volkswagen_Caddy_%2851161223218%29.jpg',
             ],
             [
                 'title'       => 'VW Arteon R-Line 2.0 TSI',
@@ -114,7 +114,7 @@ class VolkswagenSeeder extends Seeder
                 'mileage'     => 41000,
                 'price'       => 33800,
                 'color'       => 'Manganese Grey',
-                'image'       => null,
+                'image'       => 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/2021_Volkswagen_Arteon_Execline_4Motion%2C_Front_Right%2C_07-11-2021.jpg/960px-2021_Volkswagen_Arteon_Execline_4Motion%2C_Front_Right%2C_07-11-2021.jpg',
             ],
             [
                 'title'       => 'VW Transporter T6.1 2.0 TDI',
@@ -125,7 +125,7 @@ class VolkswagenSeeder extends Seeder
                 'mileage'     => 112000,
                 'price'       => 28900,
                 'color'       => 'Candy White',
-                'image'       => null,
+                'image'       => 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/VOLKSWAGEN_T6_TRANSPORTER_HONG_KONG.jpg/960px-VOLKSWAGEN_T6_TRANSPORTER_HONG_KONG.jpg',
             ],
         ];
 
@@ -133,6 +133,7 @@ class VolkswagenSeeder extends Seeder
             Volkswagen::create([...$car, 'user_id' => $user->id]);
         }
 
+        \Illuminate\Support\Facades\Cache::forget('volkswagens-all');
         $this->command->info('10 Volkswagenit lisatud!');
     }
 }

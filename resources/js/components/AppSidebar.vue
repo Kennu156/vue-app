@@ -23,10 +23,7 @@ const mainNavItems: NavItem[] = [
     { title: 'Volkswagen', href: '/volkswagens', icon: Car },
 ];
 
-const footerNavItems: NavItem[] = [
-    { title: 'Github',        href: 'https://github.com/laravel/vue-starter-kit', icon: Folder },
-    { title: 'Dokumentatsioon', href: 'https://laravel.com/docs/starter-kits',    icon: BookOpen },
-];
+const footerNavItems: NavItem[] = [];
 </script>
 
 <template>
