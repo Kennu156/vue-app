@@ -30,4 +30,15 @@ export default defineConfig({
             plugins: [tailwindcss, autoprefixer],
         },
     },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    vue: ['vue', '@inertiajs/vue3'],
+                    ui: ['radix-vue', 'lucide-vue-next'],
+                    map: ['leaflet'],
+                },
+            },
+        },
+    },
 });
