@@ -6,8 +6,8 @@ const props = defineProps<{
     order: {
         id: number;
         first_name: string;
-        total: number;
-        items: { product: { name: string }; quantity: number; price: number }[];
+        total: string | number;
+        items: { product: { name: string }; quantity: number; price: string | number }[];
     };
 }>();
 </script>
