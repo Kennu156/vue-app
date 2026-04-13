@@ -128,7 +128,7 @@
     "src": "node_modules/leaflet/dist/images/marker-shadow.png"
   },
   "resources/js/app.ts": {
-    "file": "assets/app-C5Z78D6H.js",
+    "file": "assets/app-CE2ukIGJ.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -160,7 +160,7 @@
       "resources/js/pages/settings/Profile.vue"
     ],
     "css": [
-      "assets/app-FCzf6OdD.css"
+      "assets/app-Dy4bGd7J.css"
     ]
   },
   "resources/js/pages/ApiKeys/Index.vue": {
@@ -460,7 +460,7 @@
     ]
   },
   "resources/js/pages/settings/Appearance.vue": {
-    "file": "assets/Appearance-Zv67XpBB.js",
+    "file": "assets/Appearance-DE9m-U74.js",
     "name": "Appearance",
     "src": "resources/js/pages/settings/Appearance.vue",
     "isDynamicEntry": true,
