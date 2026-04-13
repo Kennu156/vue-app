@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\VolkswagenController;
+use App\Http\Controllers\SharksController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MarkerController;
 use App\Http\Controllers\PostController;
@@ -50,6 +51,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('volkswagens', [VolkswagenController::class, 'store'])->name('volkswagens.store');
     Route::post('volkswagens/{volkswagen}', [VolkswagenController::class, 'update'])->name('volkswagens.update');
     Route::delete('volkswagens/{volkswagen}', [VolkswagenController::class, 'destroy'])->name('volkswagens.destroy');
+
+    Route::get('sharks', [SharksController::class, 'index'])->name('sharks');
 
     Route::get('api-keys', [ApiKeyController::class, 'index'])->name('api-keys');
     Route::post('api-keys', [ApiKeyController::class, 'store'])->name('api-keys.store');

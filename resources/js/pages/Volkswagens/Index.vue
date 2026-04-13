@@ -256,10 +256,10 @@ function formatMileage(m: number) {
                         class="rounded-xl border border-border px-3 py-2 text-xs font-medium transition hover:bg-muted">
                         {{ apiKey ? '📄 Testi API' : '📄 API' }}
                     </button>
-                    <button type="button" @click="showExternalApi = !showExternalApi"
+                   <!-- <button type="button" @click="showExternalApi = !showExternalApi"
                         class="rounded-xl border border-border px-3 py-2 text-xs font-medium transition hover:bg-muted">
                         🌐 Väline API
-                    </button>
+                    </button>-->
                     <button type="button" @click="openAdd"
                         class="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground
                                shadow-sm transition hover:bg-primary/90">

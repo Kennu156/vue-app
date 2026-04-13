@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Car, Folder, Key, LayoutGrid, Map, ShoppingBag } from 'lucide-vue-next';
+import { BookOpen, Car, Folder, Key, LayoutGrid, Map, ShoppingBag, Waves } from 'lucide-vue-next';
 
 const mainNavItems: NavItem[] = [
     { title: 'Ilmaennustus',  href: '/dashboard',   icon: LayoutGrid },
@@ -21,6 +21,7 @@ const mainNavItems: NavItem[] = [
     { title: 'Blogi',      href: '/blog',        icon: BookOpen },
     { title: 'Pood',       href: '/shop',        icon: ShoppingBag },
     { title: 'Volkswagen', href: '/volkswagens', icon: Car },
+    { title: 'Haid',       href: '/sharks',      icon: Waves },
 ];
 
 const footerNavItems: NavItem[] = [];
