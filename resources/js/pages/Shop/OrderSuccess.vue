@@ -29,11 +29,11 @@ const props = defineProps<{
                     <div v-for="item in order.items" :key="item.product.name"
                         class="flex justify-between text-sm">
                         <span>{{ item.product.name }} × {{ item.quantity }}</span>
-                        <span>{{ (item.price * item.quantity).toFixed(2) }} €</span>
+                        <span>{{ Number(order.total).toFixed(2) }} €</span>
                     </div>
                     <div class="flex justify-between border-t border-green-200 pt-2 font-bold dark:border-green-800">
                         <span>Kokku</span>
-                        <span>{{ order.total.toFixed(2) }} €</span>
+                        <span>{{ Number(order.total).toFixed(2) }} €</span>
                     </div>
                 </div>
 
