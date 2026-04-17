@@ -18,9 +18,9 @@ interface Shark {
     user?: { id: number; name: string };
 }
 
-const API_URL  = 'https://hajusrakendused-main-oewv1i.free.laravel.cloud/api/v1/films';
-const API_KEY  = 'IPTtKrAUan0K0gbfjbOZH4gQINTZZgDciVVdWgCvPsyuPb4r8oPDsiOcW6aG9Gkb';
-const IMG_BASE = 'https://hajusrakendused-main-oewv1i.free.laravel.cloud';
+const API_URL  = 'https://hajusrakendused-main-pm8ido.laravel.cloud/api/sharks';
+const API_KEY  = 'VyoBhOoGuiueem1rhoHjFIZUCLi9eLbBh1BdfDN5';
+const IMG_BASE = 'https://hajusrakendused-main-pm8ido.laravel.cloud';
 
 const sharks   = ref<Shark[]>([]);
 const loading  = ref(true);
